@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>AK Box Scanner</title>
+    <style>
+        :root {
+            --ak-maroon: #8B1A32;
+            --ak-maroon-dark: #6D1428;
+            --ak-cream: #F5F0DC;
+            --ak-cream-light: #FAF8F0;
+            --ak-text: #333333;
+            --ak-success: #28a745;
+            --ak-danger: #dc3545;
+            --ak-warning: #ffc107;
+            --ak-info: #17a2b8;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--ak-cream-light) 0%, var(--ak-cream) 100%);
+            min-height: 100vh;
+            color: var(--ak-text);
+        }
+        
+        body.rtl {
+            direction: rtl;
+            font-family: 'Segoe UI', Tahoma, 'Arial', sans-serif;
+        }
+        
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--ak-maroon) 0%, var(--ak-maroon-dark) 100%);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(139, 26, 50, 0.3);
+        }
+        
+        .logo { width: 60px; height: 60px; border-radius: 8px; }
+        .header h1 { color: var(--ak-cream); font-size: 1.5rem; font-weight: 600; }
+        
+        .online-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .online-status.online { background: var(--ak-success); color: white; }
+        .online-status.offline { background: var(--ak-warning); color: black; }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .card-title {
+            color: var(--ak-maroon);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--ak-cream);
+        }
+        
+        .form-group { margin-bottom: 20px; }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--ak-maroon);
+        }
+        
+        input[type="text"], input[type="password"], select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--ak-cream);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: white;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--ak-maroon);
+            box-shadow: 0 0 0 3px rgba(139, 26, 50, 0.1);
+        }
+        
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238B1A32' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            padding-right: 40px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--ak-maroon) 0%, var(--ak-maroon-dark) 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 26, 50, 0.4); }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+        .btn-success { background: var(--ak-success); color: white; }
+        .btn-danger { background: var(--ak-danger); color: white; }
+        .btn-info { background: var(--ak-info); color: white; }
+        .btn-block { width: 100%; }
+        
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-group .btn { flex: 1; min-width: 100px; }
+        
+        .language-toggle { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        
+        .lang-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--ak-maroon);
+            background: white;
+            color: var(--ak-maroon);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .lang-btn.active { background: var(--ak-maroon); color: white; }
+        
+        .screen { display: none; }
+        .screen.active { display: block; }
+        
+        .store-info-box {
+            background: var(--ak-cream-light);
+            border: 2px solid var(--ak-success);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .store-info-box h3 { color: var(--ak-success); margin-bottom: 15px; font-size: 1.1rem; }
+        .store-info-box .detail { margin: 8px 0; font-size: 1rem; }
+        .store-info-box .detail strong { color: var(--ak-maroon); }
+        
+        .scan-status {
+            background: var(--ak-cream-light);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--ak-maroon);
+        }
+        
+        .rtl .scan-status { border-left: none; border-right: 4px solid var(--ak-maroon); }
+        
+        .scan-status-item { display: flex; justify-content: space-between; padding: 5px 0; }
+        .scan-status-label { color: var(--ak-maroon); font-weight: 500; }
+        .scan-status-value { font-weight: 600; }
+        
+        .stats-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        
+        .stat-box {
+            flex: 1;
+            background: var(--ak-maroon);
+            color: white;
+            padding: 15px 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-label { font-size: 0.85rem; opacity: 0.9; margin-bottom: 5px; }
+        .stat-number { font-size: 1.8rem; font-weight: bold; }
+        
+        .table-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { background: var(--ak-maroon); color: white; padding: 12px 8px; text-align: left; }
+        .rtl th { text-align: right; }
+        td { padding: 10px 8px; border-bottom: 1px solid var(--ak-cream); }
+        tr:hover { background: var(--ak-cream-light); }
+        
+        .delete-btn {
+            background: var(--ak-danger);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-overlay.active { display: flex; }
+        
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .modal h3 { color: var(--ak-maroon); margin-bottom: 20px; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        
+        .input-highlight { animation: highlight 0.5s ease; }
+        @keyframes highlight { 0% { background-color: #d4edda; } 100% { background-color: white; } }
+        
+        .error-shake { animation: shake 0.5s ease; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        
+        .loading { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s linear infinite; margin-right: 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .sync-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+        .sync-badge.synced { background: var(--ak-success); color: white; }
+        .sync-badge.pending { background: var(--ak-warning); color: black; }
+        
+        .admin-link {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 10px;
+            color: #ccc;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .admin-link:hover { color: var(--ak-maroon); }
+        
+        .error-msg {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .error-msg.show { display: block; }
+        
+        .success-msg {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .success-msg.show { display: block; }
+        
+        @media (max-width: 600px) {
+            .container { padding: 10px; }
+            .header h1 { font-size: 1.2rem; }
+            .card { padding: 15px; }
+            .btn-group { flex-direction: column; }
+            .btn-group .btn { width: 100%; }
+            .stats-container { flex-direction: column; }
+            .stat-number { font-size: 1.5rem; }
+            table { font-size: 12px; }
+            th, td { padding: 8px 4px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header" style="position: relative;">
+            <svg class="logo" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                <rect width="60" height="60" rx="8" fill="#8B1A32"/>
+                <rect x="4" y="4" width="52" height="52" rx="6" fill="none" stroke="#F5F0DC" stroke-width="2"/>
+                <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#F5F0DC" font-family="Arial, sans-serif" font-size="24" font-weight="bold">AK</text>
+            </svg>
+            <h1 id="headerTitle">AK Box Scanner</h1>
+            <div class="online-status" id="onlineStatus">●</div>
+        </div>
+
+        <!-- Screen 1: Store Setup -->
+        <div id="storeSetupScreen" class="screen">
+            <div class="card">
+                <h2 class="card-title" id="storeSetupTitle">Store Setup</h2>
+                <p style="margin-bottom:15px; color:#666;" id="storeSetupDesc">Enter your Store ID to begin</p>
+                
+                <div class="error-msg" id="storeError"></div>
+                
+                <div class="form-group">
+                    <label id="storeIdLabel">Store ID</label>
+                    <input type="text" id="storeIdInput" placeholder="e.g., RIN20041" onkeypress="handleStoreIdKeyPress(event)">
+                </div>
+                
+                <button class="btn btn-primary btn-block" id="lookupStoreBtn" onclick="lookupStore()">
+                    <span id="lookupBtnText">Lookup Store</span>
+                </button>
+                
+                <!-- Store Confirmation -->
+                <div id="storeConfirmBox" class="store-info-box" style="display:none;">
+                    <h3>✓ Store Found!</h3>
+                    <div class="detail"><strong>Store ID:</strong> <span id="confirmStoreId"></span></div>
+                    <div class="detail"><strong>Store Name:</strong> <span id="confirmStoreName"></span></div>
+                    <div class="detail"><strong>Location:</strong> <span id="confirmLocation"></span></div>
+                    <p style="margin-top:20px; font-weight:500;" id="confirmQuestion">Is this your store?</p>
+                    <div class="btn-group" style="margin-top:15px;">
+                        <button class="btn btn-success" onclick="confirmStore(true)" id="yesConfirmBtn">Yes, Continue</button>
+                        <button class="btn btn-danger" onclick="confirmStore(false)" id="noConfirmBtn">No, Re-enter</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 2: Session Setup -->
+        <div id="sessionScreen" class="screen">
+            <div class="card">
+                <h2 class="card-title" id="sessionSetupTitle">Session Setup</h2>
+                
+                <!-- Store Info -->
+                <div class="scan-status" style="margin-bottom:20px;">
+                    <div class="scan-status-item">
+                        <span class="scan-status-label" id="storeInfoLabel">Store:</span>
+                        <span class="scan-status-value" id="sessionStoreDisplay">-</span>
+                    </div>
+                </div>
+                
+                <div class="language-toggle">
+                    <button class="lang-btn active" id="enBtn" onclick="setLanguage('en')">English</button>
+                    <button class="lang-btn" id="arBtn" onclick="setLanguage('ar')">العربية</button>
+                </div>
+                
+                <div class="form-group">
+                    <label id="staffLabel">Your Name</label>
+                    <input type="text" id="staffInput" placeholder="Enter your name...">
+                </div>
+                
+                <div class="form-group">
+                    <label id="purposeLabel">Purpose</label>
+                    <select id="purposeSelect">
+                        <option value="">-- Select purpose --</option>
+                        <option value="Store to Store">Store to Store</option>
+                        <option value="Store to DC">Store to DC</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label id="remarkLabel">Remark</label>
+                    <input type="text" id="remarkInput" placeholder="e.g., Fall Winter 2023 stocks">
+                </div>
+                
+                <button class="btn btn-primary btn-block" id="startSessionBtn" onclick="startSession()">Start Session</button>
+            </div>
+        </div>
+
+        <!-- Screen 3: Scanning -->
+        <div id="scanScreen" class="screen">
+            <div class="scan-status">
+                <div class="scan-status-item">
+                    <span class="scan-status-label" id="dispStoreLabel">Store:</span>
+                    <span class="scan-status-value" id="dispStore">-</span>
+                </div>
+                <div class="scan-status-item">
+                    <span class="scan-status-label" id="dispStaffLabel">Staff:</span>
+                    <span class="scan-status-value" id="dispStaff">-</span>
+                </div>
+                <div class="scan-status-item">
+                    <span class="scan-status-label" id="dispPurposeLabel">Purpose:</span>
+                    <span class="scan-status-value" id="dispPurpose">-</span>
+                </div>
+                <div class="scan-status-item">
+                    <span class="scan-status-label" id="dispRemarkLabel">Remark:</span>
+                    <span class="scan-status-value" id="dispRemark">-</span>
+                </div>
+                <div class="scan-status-item">
+                    <span class="scan-status-label" id="dispBoxLabel">Current Box:</span>
+                    <span class="scan-status-value" id="dispBox">-</span>
+                </div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-label" id="statTotalLabel">Total Items</div>
+                    <div class="stat-number" id="statTotal">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label" id="statBoxQtyLabel">Current Box Qty</div>
+                    <div class="stat-number" id="statBoxQty">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label" id="statBoxesLabel">Boxes Completed</div>
+                    <div class="stat-number" id="statBoxes">0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="form-group">
+                    <label id="boxIdLabel">Box ID</label>
+                    <input type="text" id="boxIdInput" placeholder="Scan box ID..." onkeypress="handleBoxKeyPress(event)">
+                </div>
+                
+                <div class="form-group" id="barcodeGroup" style="display:none;">
+                    <label id="barcodeLabel">Barcode</label>
+                    <input type="text" id="barcodeInput" placeholder="Scan barcode..." onkeypress="handleBarcodeKeyPress(event)">
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title" id="recentTitle">Current Box (Last 5) <span class="sync-badge pending" id="syncBadge">0 pending</span></h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th id="thBox">Box</th>
+                                <th id="thBarcode">Barcode</th>
+                                <th id="thTime">Time</th>
+                                <th id="thAction">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scansTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-success" id="downloadBtn" onclick="downloadExcel()">Download Excel</button>
+                <button class="btn btn-danger" id="resetBtn" onclick="confirmReset()">Reset Session</button>
+            </div>
+            
+            <div class="success-msg" id="syncSuccess" style="margin-top:15px;"></div>
+            <div class="error-msg" id="syncError" style="margin-top:15px;"></div>
+        </div>
+    </div>
+
+    <!-- Close Box Modal -->
+    <div class="modal-overlay" id="closeBoxModal">
+        <div class="modal">
+            <h3 id="closeBoxTitle">Close Box?</h3>
+            <p id="closeBoxMsg">Are you sure you want to close this box?</p>
+            <div class="modal-buttons">
+                <button class="btn btn-success" onclick="closeBox(true)">Yes</button>
+                <button class="btn btn-danger" onclick="closeBox(false)">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Modal -->
+    <div class="modal-overlay" id="resetModal">
+        <div class="modal">
+            <h3 id="resetTitle">Reset Session?</h3>
+            <p id="resetMsg">This will download current data and start a new session.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-success" onclick="executeReset(true)">Yes, Reset</button>
+                <button class="btn btn-danger" onclick="executeReset(false)">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <h3 id="deleteTitle">Delete Scan?</h3>
+            <p id="deleteMsg">Are you sure you want to delete this scan?</p>
+            <p id="deleteInfo" style="margin-top:10px; font-weight:bold; color:var(--ak-maroon);"></p>
+            <div class="modal-buttons">
+                <button class="btn btn-danger" onclick="executeDelete(true)">Yes, Delete</button>
+                <button class="btn btn-primary" onclick="executeDelete(false)">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal">
+            <h3>Admin Reset</h3>
+            <p>Enter admin code to reset store:</p>
+            <input type="password" id="adminCodeInput" style="margin-top:15px; width:100%; padding:10px; border:2px solid var(--ak-cream); border-radius:8px;">
+            <div class="modal-buttons">
+                <button class="btn btn-danger" onclick="executeAdminReset()">Reset Store</button>
+                <button class="btn btn-primary" onclick="closeAdminModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Link -->
+    <div class="admin-link" onclick="openAdminModal()">⚙️ Admin</div>
+
+    <!-- SheetJS -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    
+    <script>
+        // =============================================================
+        // CONFIGURATION - UPDATE THIS WITH YOUR GOOGLE APPS SCRIPT URL
+        // =============================================================
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzOc6X_mxeknOoSppEelhR555OvJwKBShfUYxwmEzme-nuSlV3pSekTD_YbXUL2Smz9Rg/exec';
+        const ADMIN_CODE = 'AK@2026';
+        const USE_GOOGLE_SHEETS = true;
+        
+        // FALLBACK DUMMY DATA (Used when offline or Google Sheets not configured)
+        const FALLBACK_STORES = [
+            { storeId: 'RIN20041', storeName: 'AK - Olaya Branch', location: 'Riyadh, Olaya Street' },
+            { storeId: 'RIN20042', storeName: 'AK - Malaz Branch', location: 'Riyadh, Malaz Area' },
+            { storeId: 'RIN20043', storeName: 'AK - Sulaimaniyah', location: 'Riyadh, Sulaimaniyah' },
+            { storeId: 'JED10001', storeName: 'AK - Tahlia Branch', location: 'Jeddah, Tahlia Street' },
+            { storeId: 'JED10002', storeName: 'AK - Corniche Branch', location: 'Jeddah, Corniche Road' },
+            { storeId: 'DMM30001', storeName: 'AK - Khobar Branch', location: 'Dammam, Al Khobar' }
+        ];
+
+        // ============= TRANSLATIONS =============
+        const T = {
+            en: {
+                headerTitle: "AK Box Scanner",
+                storeSetupTitle: "Store Setup",
+                storeSetupDesc: "Enter your Store ID to begin",
+                storeIdLabel: "Store ID",
+                lookupBtnText: "Lookup Store",
+                confirmQuestion: "Is this your store?",
+                yesConfirmBtn: "Yes, Continue",
+                noConfirmBtn: "No, Re-enter",
+                sessionSetupTitle: "Session Setup",
+                storeInfoLabel: "Store:",
+                staffLabel: "Your Name",
+                purposeLabel: "Purpose",
+                remarkLabel: "Remark",
+                startSessionBtn: "Start Session",
+                dispStoreLabel: "Store:",
+                dispStaffLabel: "Staff:",
+                dispPurposeLabel: "Purpose:",
+                dispRemarkLabel: "Remark:",
+                dispBoxLabel: "Current Box:",
+                statTotalLabel: "Total Items",
+                statBoxQtyLabel: "Current Box Qty",
+                statBoxesLabel: "Boxes Completed",
+                boxIdLabel: "Box ID",
+                barcodeLabel: "Barcode",
+                recentTitle: "Current Box (Last 5)",
+                thBox: "Box",
+                thBarcode: "Barcode",
+                thTime: "Time",
+                thAction: "Action",
+                downloadBtn: "Download Excel",
+                syncBtnText: "Sync to Cloud",
+                resetBtn: "Reset Session",
+                deleteBtn: "Delete",
+                closeBoxTitle: "Close Box?",
+                closeBoxMsg: "Are you sure you want to close this box?",
+                resetTitle: "Reset Session?",
+                resetMsg: "This will download current data and start a new session.",
+                deleteTitle: "Delete Scan?",
+                deleteMsg: "Are you sure you want to delete this scan?",
+                boxIdPlaceholder: "Scan box ID...",
+                barcodePlaceholder: "Scan barcode...",
+                remarkPlaceholder: "e.g., Fall Winter 2023 stocks",
+                storeIdPlaceholder: "e.g., RIN20041",
+                staffPlaceholder: "Enter your name...",
+                selectPurpose: "-- Select purpose --",
+                errStoreNotFound: "Store not found. Please check the Store ID.",
+                errEnterName: "Please enter your name",
+                errSelectPurpose: "Please select purpose",
+                errEnterRemark: "Please enter a remark",
+                errBoxFirst: "Please scan Box ID first",
+                errSameBox: "Please scan the same Box ID to confirm closing",
+                errCloseBoxFirst: "Please close the current box first!",
+                syncSuccess: "Data synced successfully!",
+                syncFailed: "Sync failed. Data saved locally.",
+                online: "● Online",
+                offline: "● Offline"
+            },
+            ar: {
+                headerTitle: "ماسح صناديق AK",
+                storeSetupTitle: "إعداد المتجر",
+                storeSetupDesc: "أدخل رقم المتجر للبدء",
+                storeIdLabel: "رقم المتجر",
+                lookupBtnText: "البحث عن المتجر",
+                confirmQuestion: "هل هذا متجرك؟",
+                yesConfirmBtn: "نعم، استمر",
+                noConfirmBtn: "لا، أعد الإدخال",
+                sessionSetupTitle: "إعداد الجلسة",
+                storeInfoLabel: "المتجر:",
+                staffLabel: "اسمك",
+                purposeLabel: "الغرض",
+                remarkLabel: "ملاحظة",
+                startSessionBtn: "بدء الجلسة",
+                dispStoreLabel: "المتجر:",
+                dispStaffLabel: "الموظف:",
+                dispPurposeLabel: "الغرض:",
+                dispRemarkLabel: "ملاحظة:",
+                dispBoxLabel: "الصندوق الحالي:",
+                statTotalLabel: "إجمالي العناصر",
+                statBoxQtyLabel: "كمية الصندوق",
+                statBoxesLabel: "صناديق مكتملة",
+                boxIdLabel: "رقم الصندوق",
+                barcodeLabel: "الباركود",
+                recentTitle: "الصندوق الحالي (آخر 5)",
+                thBox: "الصندوق",
+                thBarcode: "الباركود",
+                thTime: "الوقت",
+                thAction: "إجراء",
+                downloadBtn: "تحميل Excel",
+                syncBtnText: "مزامنة السحابة",
+                resetBtn: "إعادة تعيين",
+                deleteBtn: "حذف",
+                closeBoxTitle: "إغلاق الصندوق؟",
+                closeBoxMsg: "هل أنت متأكد من إغلاق هذا الصندوق؟",
+                resetTitle: "إعادة تعيين الجلسة؟",
+                resetMsg: "سيتم تحميل البيانات الحالية وبدء جلسة جديدة.",
+                deleteTitle: "حذف المسح؟",
+                deleteMsg: "هل أنت متأكد من حذف هذا المسح؟",
+                boxIdPlaceholder: "امسح رقم الصندوق...",
+                barcodePlaceholder: "امسح الباركود...",
+                remarkPlaceholder: "مثال: مخزون خريف وشتاء 2023",
+                storeIdPlaceholder: "مثال: RIN20041",
+                staffPlaceholder: "أدخل اسمك...",
+                selectPurpose: "-- اختر الغرض --",
+                errStoreNotFound: "المتجر غير موجود.",
+                errEnterName: "الرجاء إدخال اسمك",
+                errSelectPurpose: "الرجاء اختيار الغرض",
+                errEnterRemark: "الرجاء إدخال ملاحظة",
+                errBoxFirst: "الرجاء مسح رقم الصندوق أولاً",
+                errSameBox: "الرجاء مسح نفس رقم الصندوق للتأكيد",
+                errCloseBoxFirst: "الرجاء إغلاق الصندوق الحالي أولاً!",
+                syncSuccess: "تمت المزامنة بنجاح!",
+                syncFailed: "فشلت المزامنة. تم الحفظ محلياً.",
+                online: "● متصل",
+                offline: "● غير متصل"
+            }
+        };
+
+        // ============= STATE =============
+        let state = {
+            storeId: localStorage.getItem('ak_store_id') || '',
+            storeName: localStorage.getItem('ak_store_name') || '',
+            storeLocation: localStorage.getItem('ak_store_location') || '',
+            staffName: '',
+            purpose: '',
+            remark: '',
+            currentBox: null,
+            boxScanning: false,
+            language: 'en',
+            scans: [],
+            pendingDeleteId: null,
+            completedBoxes: new Set(),
+            isOnline: navigator.onLine
+        };
+
+        // ============= ONLINE STATUS =============
+        function updateOnlineStatus() {
+            state.isOnline = navigator.onLine;
+            const el = document.getElementById('onlineStatus');
+            if (state.isOnline) {
+                el.textContent = t('online');
+                el.className = 'online-status online';
+            } else {
+                el.textContent = t('offline');
+                el.className = 'online-status offline';
+            }
+        }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+
+        // ============= PERSISTENCE =============
+        function saveSession() {
+            localStorage.setItem('ak_session', JSON.stringify({
+                staffName: state.staffName,
+                purpose: state.purpose,
+                remark: state.remark,
+                currentBox: state.currentBox,
+                boxScanning: state.boxScanning,
+                language: state.language,
+                completedBoxes: Array.from(state.completedBoxes)
+            }));
+        }
+
+        function loadSession() {
+            const s = localStorage.getItem('ak_session');
+            if (s) {
+                try {
+                    const d = JSON.parse(s);
+                    state.staffName = d.staffName || '';
+                    state.purpose = d.purpose || '';
+                    state.remark = d.remark || '';
+                    state.currentBox = d.currentBox || null;
+                    state.boxScanning = d.boxScanning || false;
+                    state.language = d.language || 'en';
+                    state.completedBoxes = new Set(d.completedBoxes || []);
+                    return true;
+                } catch(e) { return false; }
+            }
+            return false;
+        }
+
+        function clearSession() { localStorage.removeItem('ak_session'); }
+
+        function saveStore() {
+            localStorage.setItem('ak_store_id', state.storeId);
+            localStorage.setItem('ak_store_name', state.storeName);
+            localStorage.setItem('ak_store_location', state.storeLocation);
+        }
+
+        function clearStore() {
+            localStorage.removeItem('ak_store_id');
+            localStorage.removeItem('ak_store_name');
+            localStorage.removeItem('ak_store_location');
+            state.storeId = '';
+            state.storeName = '';
+            state.storeLocation = '';
+        }
+
+        // ============= DATABASE =============
+        let db;
+        const DB_NAME = 'AKBoxScannerDB';
+        const STORE = 'scans';
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, 1);
+                req.onerror = () => reject(req.error);
+                req.onsuccess = () => { db = req.result; resolve(db); };
+                req.onupgradeneeded = (e) => {
+                    const d = e.target.result;
+                    if (!d.objectStoreNames.contains(STORE)) {
+                        d.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+                    }
+                };
+            });
+        }
+
+        async function addScan(scan) {
+            return new Promise((res, rej) => {
+                const tx = db.transaction([STORE], 'readwrite');
+                const st = tx.objectStore(STORE);
+                const req = st.add(scan);
+                req.onsuccess = () => res(req.result);
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        async function getAllScans() {
+            return new Promise((res, rej) => {
+                const tx = db.transaction([STORE], 'readonly');
+                const st = tx.objectStore(STORE);
+                const req = st.getAll();
+                req.onsuccess = () => res(req.result);
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        async function updateScan(scan) {
+            return new Promise((res, rej) => {
+                const tx = db.transaction([STORE], 'readwrite');
+                const st = tx.objectStore(STORE);
+                const req = st.put(scan);
+                req.onsuccess = () => res(req.result);
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        async function deleteScanById(id) {
+            return new Promise((res, rej) => {
+                const tx = db.transaction([STORE], 'readwrite');
+                const st = tx.objectStore(STORE);
+                const req = st.delete(id);
+                req.onsuccess = () => res();
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        async function clearAllScans() {
+            return new Promise((res, rej) => {
+                const tx = db.transaction([STORE], 'readwrite');
+                const st = tx.objectStore(STORE);
+                const req = st.clear();
+                req.onsuccess = () => res();
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        // ============= GOOGLE SHEETS API =============
+        async function fetchFromGoogleSheets(action, params = {}) {
+            if (!USE_GOOGLE_SHEETS || !state.isOnline) {
+                return null;
+            }
+            
+            try {
+                const url = new URL(GOOGLE_SCRIPT_URL);
+                url.searchParams.append('action', action);
+                Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
+                
+                const response = await fetch(url.toString());
+                const data = await response.json();
+                return data;
+            } catch (e) {
+                console.log('Google Sheets fetch failed:', e);
+                return null;
+            }
+        }
+
+        async function postToGoogleSheets(action, payload) {
+            if (!USE_GOOGLE_SHEETS || !state.isOnline) {
+                return null;
+            }
+            
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ action, ...payload })
+                });
+                // With no-cors, we can't read response, so assume success
+                return { success: true };
+            } catch (e) {
+                console.log('Google Sheets post failed:', e);
+                return null;
+            }
+        }
+
+        // ============= DATA FETCHING =============
+        async function getStoreData(storeId) {
+            // Try Google Sheets first
+            const gsResult = await fetchFromGoogleSheets('getStore', { storeId });
+            if (gsResult && gsResult.success && gsResult.store) {
+                return gsResult.store;
+            }
+            
+            // Fallback to local data
+            return FALLBACK_STORES.find(s => s.storeId.toUpperCase() === storeId.toUpperCase()) || null;
+        }
+
+        // ============= LANGUAGE =============
+        function t(key) { return T[state.language][key] || key; }
+
+        function setLanguage(lang) {
+            state.language = lang;
+            document.body.classList.toggle('rtl', lang === 'ar');
+            document.getElementById('enBtn').classList.toggle('active', lang === 'en');
+            document.getElementById('arBtn').classList.toggle('active', lang === 'ar');
+            applyTranslations();
+            saveSession();
+        }
+
+        function applyTranslations() {
+            const lang = T[state.language];
+            Object.keys(lang).forEach(k => {
+                const el = document.getElementById(k);
+                if (el && el.tagName !== 'INPUT' && el.tagName !== 'SELECT') {
+                    el.textContent = lang[k];
+                }
+            });
+            document.getElementById('boxIdInput').placeholder = t('boxIdPlaceholder');
+            document.getElementById('barcodeInput').placeholder = t('barcodePlaceholder');
+            document.getElementById('remarkInput').placeholder = t('remarkPlaceholder');
+            document.getElementById('storeIdInput').placeholder = t('storeIdPlaceholder');
+            document.getElementById('staffInput').placeholder = t('staffPlaceholder');
+            
+            const purpSel = document.getElementById('purposeSelect');
+            if (purpSel.options[0]) purpSel.options[0].textContent = t('selectPurpose');
+            
+            updateOnlineStatus();
+            updateScansTable();
+        }
+
+        // ============= SCREENS =============
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // ============= STORE SETUP =============
+        function handleStoreIdKeyPress(e) { if (e.key === 'Enter') lookupStore(); }
+
+        async function lookupStore() {
+            const id = document.getElementById('storeIdInput').value.trim().toUpperCase();
+            const errDiv = document.getElementById('storeError');
+            const btn = document.getElementById('lookupStoreBtn');
+            
+            if (!id) {
+                errDiv.textContent = t('errStoreNotFound');
+                errDiv.classList.add('show');
+                return;
+            }
+            
+            // Show loading
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Loading...';
+            
+            const store = await getStoreData(id);
+            
+            // Reset button
+            btn.disabled = false;
+            btn.innerHTML = `<span id="lookupBtnText">${t('lookupBtnText')}</span>`;
+            
+            if (store) {
+                errDiv.classList.remove('show');
+                document.getElementById('confirmStoreId').textContent = store.storeId;
+                document.getElementById('confirmStoreName').textContent = store.storeName;
+                document.getElementById('confirmLocation').textContent = store.location;
+                document.getElementById('storeConfirmBox').style.display = 'block';
+                btn.style.display = 'none';
+                
+                state.storeId = store.storeId;
+                state.storeName = store.storeName;
+                state.storeLocation = store.location;
+            } else {
+                errDiv.textContent = t('errStoreNotFound');
+                errDiv.classList.add('show');
+                document.getElementById('storeIdInput').classList.add('error-shake');
+                setTimeout(() => document.getElementById('storeIdInput').classList.remove('error-shake'), 500);
+            }
+        }
+
+        async function confirmStore(confirmed) {
+            if (confirmed) {
+                saveStore();
+                document.getElementById('sessionStoreDisplay').textContent = `${state.storeId} - ${state.storeName}`;
+                showScreen('sessionScreen');
+            } else {
+                document.getElementById('storeIdInput').value = '';
+                document.getElementById('storeConfirmBox').style.display = 'none';
+                document.getElementById('lookupStoreBtn').style.display = 'block';
+                state.storeId = '';
+                state.storeName = '';
+                state.storeLocation = '';
+            }
+        }
+
+        // Staff name is now manual input - no dropdown needed
+
+        // ============= SESSION =============
+        function startSession() {
+            const staff = document.getElementById('staffInput').value.trim();
+            const purpose = document.getElementById('purposeSelect').value;
+            const remark = document.getElementById('remarkInput').value.trim();
+            
+            if (!staff) { alert(t('errEnterName')); return; }
+            if (!purpose) { alert(t('errSelectPurpose')); return; }
+            if (!remark) { alert(t('errEnterRemark')); return; }
+            
+            state.staffName = staff;
+            state.purpose = purpose;
+            state.remark = remark;
+            saveSession();
+            
+            document.getElementById('dispStore').textContent = `${state.storeId} - ${state.storeName}`;
+            document.getElementById('dispStaff').textContent = state.staffName;
+            document.getElementById('dispPurpose').textContent = state.purpose;
+            document.getElementById('dispRemark').textContent = state.remark;
+            document.getElementById('dispBox').textContent = '-';
+            
+            showScreen('scanScreen');
+            document.getElementById('boxIdInput').focus();
+            loadAndDisplayScans();
+        }
+
+        // ============= SCANNING =============
+        function handleBoxKeyPress(e) {
+            if (e.key === 'Enter') {
+                const boxId = document.getElementById('boxIdInput').value.trim();
+                if (!boxId) return;
+                
+                if (!state.boxScanning) {
+                    state.currentBox = boxId;
+                    state.boxScanning = true;
+                    saveSession();
+                    document.getElementById('dispBox').textContent = boxId;
+                    document.getElementById('barcodeGroup').style.display = 'block';
+                    document.getElementById('boxIdInput').value = '';
+                    document.getElementById('boxIdInput').classList.add('input-highlight');
+                    setTimeout(() => document.getElementById('boxIdInput').classList.remove('input-highlight'), 500);
+                    document.getElementById('barcodeInput').focus();
+                    updateStats();
+                } else {
+                    if (boxId === state.currentBox) {
+                        document.getElementById('boxIdInput').value = '';
+                        document.getElementById('closeBoxModal').classList.add('active');
+                    } else {
+                        alert(t('errSameBox'));
+                        document.getElementById('boxIdInput').value = '';
+                    }
+                }
+            }
+        }
+
+        async function handleBarcodeKeyPress(e) {
+            if (e.key === 'Enter') {
+                const barcode = document.getElementById('barcodeInput').value.trim();
+                if (!barcode) return;
+                
+                if (!state.boxScanning) {
+                    alert(t('errBoxFirst'));
+                    document.getElementById('barcodeInput').value = '';
+                    document.getElementById('boxIdInput').focus();
+                    return;
+                }
+                
+                const scan = {
+                    storeId: state.storeId,
+                    storeName: state.storeName,
+                    staffName: state.staffName,
+                    purpose: state.purpose,
+                    remark: state.remark,
+                    boxNumber: String(state.currentBox),
+                    barcode: String(barcode),
+                    qty: 1,
+                    boxStatus: 'Open',
+                    timestamp: new Date().toISOString(),
+                    synced: false
+                };
+                
+                await addScan(scan);
+                
+                document.getElementById('barcodeInput').value = '';
+                document.getElementById('barcodeInput').classList.add('input-highlight');
+                setTimeout(() => document.getElementById('barcodeInput').classList.remove('input-highlight'), 500);
+                
+                await loadAndDisplayScans();
+            }
+        }
+
+        async function closeBox(confirmed) {
+            document.getElementById('closeBoxModal').classList.remove('active');
+            
+            if (confirmed) {
+                // Mark all scans for this box as "Closed"
+                const closedBox = state.currentBox;
+                for (const scan of state.scans) {
+                    if (scan.boxNumber === closedBox && scan.boxStatus === 'Open') {
+                        scan.boxStatus = 'Closed';
+                        scan.synced = false; // Re-sync with updated status
+                        await updateScan(scan);
+                    }
+                }
+                
+                if (state.currentBox) state.completedBoxes.add(state.currentBox);
+                state.currentBox = null;
+                state.boxScanning = false;
+                saveSession();
+                document.getElementById('dispBox').textContent = '-';
+                document.getElementById('barcodeGroup').style.display = 'none';
+                document.getElementById('boxIdInput').focus();
+                await loadAndDisplayScans();
+                updateStats();
+                
+                // AUTO-SYNC when box is closed
+                if (state.isOnline && USE_GOOGLE_SHEETS) {
+                    await autoSync();
+                }
+            } else {
+                document.getElementById('barcodeInput').focus();
+            }
+        }
+        
+        // Silent auto-sync (no alerts) - Only syncs CLOSED boxes
+        async function autoSync() {
+            try {
+                // Only sync items from CLOSED boxes (not synced yet)
+                const unsynced = state.scans.filter(s => !s.synced && s.boxStatus === 'Closed');
+                if (unsynced.length === 0) return;
+                
+                const result = await postToGoogleSheets('addScans', { scans: unsynced });
+                
+                if (result && result.success) {
+                    for (const scan of unsynced) {
+                        scan.synced = true;
+                        await updateScan(scan);
+                    }
+                    await loadAndDisplayScans();
+                    console.log('Auto-synced ' + unsynced.length + ' scans');
+                }
+            } catch (e) {
+                console.log('Auto-sync failed:', e);
+            }
+        }
+
+        // ============= DISPLAY =============
+        async function loadAndDisplayScans() {
+            state.scans = await getAllScans();
+            updateStats();
+            updateScansTable();
+            updateSyncBadge();
+        }
+
+        function updateStats() {
+            document.getElementById('statTotal').textContent = state.scans.length;
+            
+            let boxQty = 0;
+            if (state.currentBox) {
+                boxQty = state.scans.filter(s => s.boxNumber === state.currentBox).length;
+            }
+            document.getElementById('statBoxQty').textContent = boxQty;
+            document.getElementById('statBoxes').textContent = state.completedBoxes.size;
+        }
+
+        function updateSyncBadge() {
+            // Only count CLOSED box items as pending for sync
+            const pending = state.scans.filter(s => !s.synced && s.boxStatus === 'Closed').length;
+            const badge = document.getElementById('syncBadge');
+            
+            if (pending === 0) {
+                badge.textContent = '✓ Synced';
+                badge.className = 'sync-badge synced';
+            } else {
+                badge.textContent = `${pending} pending`;
+                badge.className = 'sync-badge pending';
+            }
+        }
+
+        function updateScansTable() {
+            const tbody = document.getElementById('scansTableBody');
+            tbody.innerHTML = '';
+            
+            // Only show items from current OPEN box (last 5)
+            const currentBoxScans = state.scans.filter(s => 
+                s.boxNumber === state.currentBox && s.boxStatus === 'Open'
+            );
+            const recent = currentBoxScans.slice(-5).reverse();
+            
+            recent.forEach(scan => {
+                const tr = document.createElement('tr');
+                const time = new Date(scan.timestamp).toLocaleTimeString();
+                tr.innerHTML = `
+                    <td>${scan.boxNumber}</td>
+                    <td>${scan.barcode}</td>
+                    <td>${time}</td>
+                    <td><button class="delete-btn" onclick="confirmDelete(${scan.id}, '${scan.boxNumber}', '${scan.barcode}')">${t('deleteBtn')}</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ============= DELETE =============
+        function confirmDelete(id, box, barcode) {
+            state.pendingDeleteId = id;
+            document.getElementById('deleteInfo').textContent = `Box: ${box} | Barcode: ${barcode}`;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        async function executeDelete(confirmed) {
+            document.getElementById('deleteModal').classList.remove('active');
+            if (confirmed && state.pendingDeleteId) {
+                await deleteScanById(state.pendingDeleteId);
+                await loadAndDisplayScans();
+            }
+            state.pendingDeleteId = null;
+        }
+
+        // ============= SYNC TO CLOUD =============
+        async function syncToCloud() {
+            const successDiv = document.getElementById('syncSuccess');
+            const errorDiv = document.getElementById('syncError');
+            successDiv.classList.remove('show');
+            errorDiv.classList.remove('show');
+            
+            if (!USE_GOOGLE_SHEETS) {
+                errorDiv.textContent = 'Cloud sync not configured. Update GOOGLE_SCRIPT_URL in the app.';
+                errorDiv.classList.add('show');
+                return;
+            }
+            
+            if (!state.isOnline) {
+                errorDiv.textContent = 'No internet connection. Please try again when online.';
+                errorDiv.classList.add('show');
+                return;
+            }
+            
+            const btn = document.getElementById('syncBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Syncing...';
+            
+            try {
+                const unsynced = state.scans.filter(s => !s.synced);
+                
+                if (unsynced.length === 0) {
+                    successDiv.textContent = 'All data already synced!';
+                    successDiv.classList.add('show');
+                    btn.disabled = false;
+                    btn.innerHTML = `<span id="syncBtnText">${t('syncBtnText')}</span>`;
+                    return;
+                }
+                
+                const result = await postToGoogleSheets('addScans', { scans: unsynced });
+                
+                if (result && result.success) {
+                    // Mark as synced
+                    for (const scan of unsynced) {
+                        scan.synced = true;
+                        await updateScan(scan);
+                    }
+                    
+                    successDiv.textContent = `${t('syncSuccess')} (${unsynced.length} records)`;
+                    successDiv.classList.add('show');
+                    await loadAndDisplayScans();
+                } else {
+                    throw new Error('Sync failed');
+                }
+            } catch (e) {
+                console.error('Sync error:', e);
+                errorDiv.textContent = t('syncFailed');
+                errorDiv.classList.add('show');
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = `<span id="syncBtnText">${t('syncBtnText')}</span>`;
+            
+            setTimeout(() => {
+                successDiv.classList.remove('show');
+                errorDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        // ============= EXPORT =============
+        async function downloadExcel() {
+            // Check if box is still open
+            if (state.boxScanning && state.currentBox) {
+                alert(t('errCloseBoxFirst'));
+                return;
+            }
+            
+            const scans = await getAllScans();
+            
+            const data = scans.length === 0 
+                ? [['Store ID', 'Store Name', 'Staff', 'Purpose', 'Remark', 'Box Number', 'Barcode', 'Qty', 'Box Status', 'Timestamp']]
+                : scans.map(s => ({
+                    'Store ID': s.storeId,
+                    'Store Name': s.storeName,
+                    'Staff': s.staffName,
+                    'Purpose': s.purpose,
+                    'Remark': s.remark,
+                    'Box Number': s.boxNumber,
+                    'Barcode': s.barcode,
+                    'Qty': s.qty,
+                    'Box Status': s.boxStatus || 'Open',
+                    'Timestamp': new Date(s.timestamp).toLocaleString()
+                }));
+            
+            const ws = scans.length === 0 
+                ? XLSX.utils.aoa_to_sheet(data)
+                : XLSX.utils.json_to_sheet(data);
+            
+            ws['!cols'] = [{wch:12},{wch:25},{wch:15},{wch:15},{wch:25},{wch:15},{wch:25},{wch:5},{wch:10},{wch:20}];
+            
+            if (scans.length > 0) {
+                const range = XLSX.utils.decode_range(ws['!ref']);
+                for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+                    const cell = ws[XLSX.utils.encode_cell({ r: R, c: 6 })];
+                    if (cell) { cell.t = 's'; cell.v = String(cell.v); }
+                }
+            }
+            
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Scans');
+            
+            const now = new Date();
+            const filename = `${state.storeId}_${state.staffName}_${now.toISOString().slice(0,10)}_${now.toTimeString().slice(0,5).replace(':','')}.xlsx`;
+            XLSX.writeFile(wb, filename);
+        }
+
+        // ============= RESET =============
+        function confirmReset() {
+            // Check if box is still open
+            if (state.boxScanning && state.currentBox) {
+                alert(t('errCloseBoxFirst'));
+                return;
+            }
+            document.getElementById('resetModal').classList.add('active');
+        }
+
+        async function executeReset(confirmed) {
+            document.getElementById('resetModal').classList.remove('active');
+            
+            if (confirmed) {
+                await downloadExcel();
+                await clearAllScans();
+                
+                state.staffName = '';
+                state.purpose = '';
+                state.remark = '';
+                state.currentBox = null;
+                state.boxScanning = false;
+                state.scans = [];
+                state.completedBoxes = new Set();
+                clearSession();
+                
+                document.getElementById('staffInput').value = '';
+                document.getElementById('purposeSelect').value = '';
+                document.getElementById('remarkInput').value = '';
+                document.getElementById('boxIdInput').value = '';
+                document.getElementById('barcodeInput').value = '';
+                document.getElementById('barcodeGroup').style.display = 'none';
+                
+                document.getElementById('sessionStoreDisplay').textContent = `${state.storeId} - ${state.storeName}`;
+                showScreen('sessionScreen');
+            }
+        }
+
+        // ============= ADMIN =============
+        function openAdminModal() {
+            document.getElementById('adminModal').classList.add('active');
+            document.getElementById('adminCodeInput').value = '';
+        }
+
+        function closeAdminModal() { document.getElementById('adminModal').classList.remove('active'); }
+
+        async function executeAdminReset() {
+            const code = document.getElementById('adminCodeInput').value;
+            
+            if (code === ADMIN_CODE) {
+                clearStore();
+                clearSession();
+                await clearAllScans();
+                
+                state.staffName = '';
+                state.purpose = '';
+                state.remark = '';
+                state.currentBox = null;
+                state.boxScanning = false;
+                state.scans = [];
+                state.completedBoxes = new Set();
+                
+                closeAdminModal();
+                document.getElementById('storeIdInput').value = '';
+                document.getElementById('storeConfirmBox').style.display = 'none';
+                document.getElementById('lookupStoreBtn').style.display = 'block';
+                document.getElementById('storeError').classList.remove('show');
+                showScreen('storeSetupScreen');
+                
+                alert('Store reset successful!');
+            } else {
+                alert('Invalid admin code.');
+            }
+        }
+
+        // ============= INIT =============
+        async function initApp() {
+            updateOnlineStatus();
+            
+            if (!state.storeId) {
+                showScreen('storeSetupScreen');
+                return;
+            }
+            
+            document.getElementById('sessionStoreDisplay').textContent = `${state.storeId} - ${state.storeName}`;
+            
+            const hasSession = loadSession();
+            
+            if (hasSession && state.staffName && state.purpose && state.remark) {
+                setLanguage(state.language);
+                
+                document.getElementById('dispStore').textContent = `${state.storeId} - ${state.storeName}`;
+                document.getElementById('dispStaff').textContent = state.staffName;
+                document.getElementById('dispPurpose').textContent = state.purpose;
+                document.getElementById('dispRemark').textContent = state.remark;
+                document.getElementById('dispBox').textContent = state.currentBox || '-';
+                
+                if (state.boxScanning && state.currentBox) {
+                    document.getElementById('barcodeGroup').style.display = 'block';
+                }
+                
+                showScreen('scanScreen');
+                state.boxScanning ? document.getElementById('barcodeInput').focus() : document.getElementById('boxIdInput').focus();
+                loadAndDisplayScans();
+            } else {
+                showScreen('sessionScreen');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initDB();
+            await initApp();
+            applyTranslations();
+            
+            // Auto-sync every 10 seconds
+            setInterval(async () => {
+                if (state.isOnline && USE_GOOGLE_SHEETS && state.staffName) {
+                    await autoSync();
+                }
+            }, 10000); // 10 seconds
+        });
+    </script>
+</body>
+</html>
