@@ -184,19 +184,46 @@
         .scan-status-label { color: var(--ak-maroon); font-weight: 500; }
         .scan-status-value { font-weight: 600; }
         
-        .stats-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        .stats-container { 
+            display: flex; 
+            gap: 0; 
+            margin-bottom: 20px;
+            background: var(--ak-maroon);
+            border-radius: 8px;
+            overflow: hidden;
+        }
         
         .stat-box {
             flex: 1;
             background: var(--ak-maroon);
             color: white;
-            padding: 15px 10px;
-            border-radius: 8px;
+            padding: 10px 5px;
             text-align: center;
+            border-right: 1px solid rgba(255,255,255,0.2);
         }
         
-        .stat-label { font-size: 0.85rem; opacity: 0.9; margin-bottom: 5px; }
-        .stat-number { font-size: 1.8rem; font-weight: bold; }
+        .stat-box:last-child { border-right: none; }
+        
+        .stat-label { font-size: 0.7rem; opacity: 0.9; margin-bottom: 3px; }
+        .stat-number { font-size: 1.3rem; font-weight: bold; }
+        
+        .close-box-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--ak-danger);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .close-box-btn.show { display: block; }
+        
+        .close-box-btn:active { background: #c82333; }
         
         .table-container { overflow-x: auto; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
@@ -431,6 +458,10 @@
             </div>
 
             <div class="card">
+                <button class="close-box-btn" id="closeBoxBtn" onclick="showCloseBoxConfirm()">
+                    ✕ Close Box <span id="closeBoxBtnId"></span>
+                </button>
+                
                 <div class="form-group">
                     <label id="boxIdLabel">Box ID</label>
                     <input type="text" id="boxIdInput" placeholder="Scan box ID..." onkeypress="handleBoxKeyPress(event)">
@@ -1006,17 +1037,24 @@
                     document.getElementById('boxIdInput').classList.add('input-highlight');
                     setTimeout(() => document.getElementById('boxIdInput').classList.remove('input-highlight'), 500);
                     document.getElementById('barcodeInput').focus();
+                    // Show Close Box button
+                    document.getElementById('closeBoxBtn').classList.add('show');
+                    document.getElementById('closeBoxBtnId').textContent = boxId;
                     updateStats();
                 } else {
                     if (boxId === state.currentBox) {
                         document.getElementById('boxIdInput').value = '';
-                        document.getElementById('closeBoxModal').classList.add('active');
+                        showCloseBoxConfirm();
                     } else {
                         alert(t('errSameBox'));
                         document.getElementById('boxIdInput').value = '';
                     }
                 }
             }
+        }
+        
+        function showCloseBoxConfirm() {
+            document.getElementById('closeBoxModal').classList.add('active');
         }
 
         async function handleBarcodeKeyPress(e) {
@@ -1075,6 +1113,9 @@
                 saveSession();
                 document.getElementById('dispBox').textContent = '-';
                 document.getElementById('barcodeGroup').style.display = 'none';
+                // Hide Close Box button
+                document.getElementById('closeBoxBtn').classList.remove('show');
+                document.getElementById('closeBoxBtnId').textContent = '';
                 document.getElementById('boxIdInput').focus();
                 await loadAndDisplayScans();
                 updateStats();
@@ -1392,6 +1433,9 @@
                 
                 if (state.boxScanning && state.currentBox) {
                     document.getElementById('barcodeGroup').style.display = 'block';
+                    // Show Close Box button if box is open
+                    document.getElementById('closeBoxBtn').classList.add('show');
+                    document.getElementById('closeBoxBtnId').textContent = state.currentBox;
                 }
                 
                 showScreen('scanScreen');
