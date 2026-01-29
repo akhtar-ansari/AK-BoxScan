@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>AK Box Scanner</title>
+    <style>
+        :root {
+            --ak-maroon: #8B1A32;
+            --ak-maroon-dark: #6D1428;
+            --ak-cream: #F5F0DC;
+            --ak-cream-light: #FAF8F0;
+            --ak-text: #333333;
+            --ak-success: #28a745;
+            --ak-danger: #dc3545;
+            --ak-warning: #ffc107;
+            --ak-info: #17a2b8;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--ak-cream-light);
+            min-height: 100vh;
+            color: var(--ak-text);
+        }
+        
+        body.rtl { direction: rtl; }
+        
+        .container { max-width: 500px; margin: 0 auto; padding: 8px; }
+        
+        /* Compact Header */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, var(--ak-maroon) 0%, var(--ak-maroon-dark) 100%);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .logo { 
+            width: 35px; 
+            height: 35px; 
+            border-radius: 6px; 
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--ak-maroon);
+            font-size: 12px;
+        }
+        
+        .header h1 { color: var(--ak-cream); font-size: 1rem; font-weight: 600; flex: 1; }
+        
+        .online-status {
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .online-status.online { background: var(--ak-success); color: white; }
+        .online-status.offline { background: var(--ak-warning); color: black; }
+        
+        /* Compact Info Bar */
+        .info-bar {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            border-left: 3px solid var(--ak-maroon);
+        }
+        
+        .info-bar span { color: var(--ak-maroon); font-weight: 600; }
+        
+        /* Stats - Side by Side */
+        .stats-container { 
+            display: flex; 
+            gap: 0; 
+            margin-bottom: 8px;
+            background: var(--ak-maroon);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .stat-box {
+            flex: 1;
+            padding: 8px 4px;
+            text-align: center;
+            color: white;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .stat-box:last-child { border-right: none; }
+        .stat-label { font-size: 9px; opacity: 0.9; }
+        .stat-number { font-size: 1.2rem; font-weight: bold; }
+        
+        /* Card */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .card-title {
+            color: var(--ak-maroon);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Form Elements */
+        .form-group { margin-bottom: 10px; }
+        
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+            color: var(--ak-maroon);
+            font-size: 12px;
+        }
+        
+        input[type="text"], input[type="password"], select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--ak-cream);
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--ak-maroon);
+        }
+        
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238B1A32' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 35px;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .btn-primary { background: var(--ak-maroon); color: white; }
+        .btn-success { background: var(--ak-success); color: white; }
+        .btn-danger { background: var(--ak-danger); color: white; }
+        .btn-block { width: 100%; }
+        
+        .btn-group { display: flex; gap: 8px; }
+        .btn-group .btn { flex: 1; padding: 8px 10px; font-size: 12px; }
+        
+        /* Close Box Button */
+        .close-box-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--ak-danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+            display: none;
+        }
+        
+        .close-box-btn.show { display: block; }
+        
+        /* Box ID Group - hidden when box open */
+        .box-id-group { display: block; }
+        .box-id-group.hidden { display: none; }
+        
+        /* Table */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th { background: var(--ak-maroon); color: white; padding: 6px 4px; text-align: left; }
+        td { padding: 6px 4px; border-bottom: 1px solid var(--ak-cream); }
+        
+        .delete-btn {
+            background: var(--ak-danger);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        
+        /* Sync Badge */
+        .sync-badge {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+        .sync-badge.synced { background: var(--ak-success); color: white; }
+        .sync-badge.pending { background: var(--ak-warning); color: black; }
+        
+        /* Language Toggle */
+        .language-toggle { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
+        
+        .lang-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--ak-maroon);
+            background: white;
+            color: var(--ak-maroon);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .lang-btn.active { background: var(--ak-maroon); color: white; }
+        
+        /* Screens */
+        .screen { display: none; }
+        .screen.active { display: block; }
+        
+        /* Store Info Box */
+        .store-info-box {
+            background: var(--ak-cream-light);
+            border: 2px solid var(--ak-success);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .store-info-box h3 { color: var(--ak-success); margin-bottom: 10px; font-size: 1rem; }
+        .store-info-box .detail { margin: 5px 0; font-size: 13px; }
+        .store-info-box .detail strong { color: var(--ak-maroon); }
+        
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.active { display: flex; }
+        
+        .modal {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 320px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .modal h3 { color: var(--ak-maroon); margin-bottom: 10px; }
+        .modal p { margin-bottom: 15px; font-size: 14px; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; }
+        .modal-buttons .btn { min-width: 80px; }
+        
+        /* Admin Link */
+        .admin-link {
+            text-align: right;
+            margin-top: 8px;
+            font-size: 11px;
+        }
+        
+        .admin-link a {
+            color: #999;
+            text-decoration: none;
+        }
+        
+        /* Error/Success Messages */
+        .error-msg, .success-msg {
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: none;
+        }
+        
+        .error-msg { background: #f8d7da; color: #721c24; }
+        .success-msg { background: #d4edda; color: #155724; }
+        .error-msg.show, .success-msg.show { display: block; }
+        
+        /* Input highlight */
+        .input-highlight { animation: highlight 0.5s ease; }
+        @keyframes highlight {
+            0%, 100% { background: white; }
+            50% { background: #d4edda; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header - Always Visible -->
+        <div class="header">
+            <div class="logo">AK</div>
+            <h1 id="headerTitle">AK Box Scanner</h1>
+            <span class="online-status online" id="onlineStatus">● Online</span>
+        </div>
+
+        <!-- Screen 1: Store Setup -->
+        <div id="storeSetupScreen" class="screen active">
+            <div class="card">
+                <h2 class="card-title" id="storeSetupTitle">Store Setup</h2>
+                <p style="margin-bottom:15px; font-size:13px;" id="storeSetupDesc">Enter your Store ID to begin</p>
+                
+                <div class="form-group">
+                    <label id="storeIdLabel">Store ID</label>
+                    <input type="text" id="storeIdInput" placeholder="e.g., RIN20041" onkeypress="handleStoreIdKeyPress(event)">
+                </div>
+                
+                <div class="error-msg" id="storeError"></div>
+                
+                <button class="btn btn-primary btn-block" id="lookupStoreBtn" onclick="lookupStore()">
+                    <span id="lookupBtnText">Lookup Store</span>
+                </button>
+                
+                <div id="storeConfirmBox" class="store-info-box" style="display:none;">
+                    <h3>✓ Store Found!</h3>
+                    <div class="detail"><strong>Store ID:</strong> <span id="confirmStoreId"></span></div>
+                    <div class="detail"><strong>Store Name:</strong> <span id="confirmStoreName"></span></div>
+                    <div class="detail"><strong>Location:</strong> <span id="confirmLocation"></span></div>
+                    <p style="margin-top:15px; font-weight:500;" id="confirmQuestion">Is this your store?</p>
+                    <div class="btn-group" style="margin-top:10px;">
+                        <button class="btn btn-success" onclick="confirmStore(true)" id="yesConfirmBtn">Yes</button>
+                        <button class="btn btn-danger" onclick="confirmStore(false)" id="noConfirmBtn">No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 2: Session Setup -->
+        <div id="sessionScreen" class="screen">
+            <div class="card">
+                <h2 class="card-title" id="sessionSetupTitle">Session Setup</h2>
+                
+                <div class="info-bar" style="margin-bottom:15px;">
+                    <span>Store:</span> <span id="sessionStoreDisplay">-</span>
+                </div>
+                
+                <div class="language-toggle">
+                    <button class="lang-btn active" id="enBtn" onclick="setLanguage('en')">EN</button>
+                    <button class="lang-btn" id="arBtn" onclick="setLanguage('ar')">عربي</button>
+                </div>
+                
+                <div class="form-group">
+                    <label id="staffLabel">Your Name</label>
+                    <input type="text" id="staffInput" placeholder="Enter your name...">
+                </div>
+                
+                <div class="form-group">
+                    <label id="purposeLabel">Purpose</label>
+                    <select id="purposeSelect">
+                        <option value="">-- Select purpose --</option>
+                        <option value="Store to Store">Store to Store</option>
+                        <option value="Store to DC">Store to DC</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label id="remarkLabel">Remark</label>
+                    <input type="text" id="remarkInput" placeholder="e.g., Fall Winter 2023 stocks">
+                </div>
+                
+                <button class="btn btn-primary btn-block" id="startSessionBtn" onclick="startSession()">Start Session</button>
+            </div>
+        </div>
+
+        <!-- Screen 3: Scanning (Compact One-Screen View) -->
+        <div id="scanScreen" class="screen">
+            <!-- Compact Info Bar - Only Store & Staff -->
+            <div class="info-bar">
+                <span id="dispStoreLabel">Store:</span> <span id="dispStore">-</span> | 
+                <span id="dispStaffLabel">Staff:</span> <span id="dispStaff">-</span>
+            </div>
+
+            <!-- Stats - Side by Side -->
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-label" id="statTotalLabel">Total</div>
+                    <div class="stat-number" id="statTotal">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label" id="statBoxQtyLabel">Box Qty</div>
+                    <div class="stat-number" id="statBoxQty">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label" id="statBoxesLabel">Boxes</div>
+                    <div class="stat-number" id="statBoxes">0</div>
+                </div>
+            </div>
+
+            <!-- Scanning Card -->
+            <div class="card">
+                <!-- Close Box Button - Only shown when box is open -->
+                <button class="close-box-btn" id="closeBoxBtn" onclick="showCloseBoxConfirm()">
+                    ✕ Close Box <span id="closeBoxBtnId"></span>
+                </button>
+                
+                <!-- Box ID - Hidden when box is open -->
+                <div class="form-group box-id-group" id="boxIdGroup">
+                    <label id="boxIdLabel">Box ID</label>
+                    <input type="text" id="boxIdInput" placeholder="Scan box ID..." onkeypress="handleBoxKeyPress(event)">
+                </div>
+                
+                <!-- Barcode - Shown when box is open -->
+                <div class="form-group" id="barcodeGroup" style="display:none;">
+                    <label id="barcodeLabel">Barcode</label>
+                    <input type="text" id="barcodeInput" placeholder="Scan barcode..." onkeypress="handleBarcodeKeyPress(event)">
+                </div>
+            </div>
+
+            <!-- Recent Scans -->
+            <div class="card">
+                <div class="card-title">
+                    <span id="recentTitle">Last 5 Scans</span>
+                    <span class="sync-badge synced" id="syncBadge">✓</span>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th id="thBarcode">Barcode</th>
+                                <th id="thTime">Time</th>
+                                <th id="thAction">Del</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scansTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Buttons - Side by Side, Smaller -->
+            <div class="btn-group">
+                <button class="btn btn-success" id="downloadBtn" onclick="downloadExcel()">Download</button>
+                <button class="btn btn-danger" id="resetBtn" onclick="confirmReset()">Reset</button>
+            </div>
+            
+            <div class="admin-link">
+                <a href="#" onclick="openAdminModal(); return false;">⚙️ Admin</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Close Box Modal -->
+    <div class="modal-overlay" id="closeBoxModal">
+        <div class="modal">
+            <h3 id="closeBoxTitle">Close Box?</h3>
+            <p id="closeBoxMsg">Are you sure you want to close this box?</p>
+            <div class="modal-buttons">
+                <button class="btn btn-success" onclick="closeBox(true)">Yes</button>
+                <button class="btn btn-danger" onclick="closeBox(false)">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Modal -->
+    <div class="modal-overlay" id="resetModal">
+        <div class="modal">
+            <h3 id="resetTitle">Reset Session?</h3>
+            <p id="resetMsg">Download data and start new session?</p>
+            <div class="modal-buttons">
+                <button class="btn btn-success" onclick="executeReset(true)">Yes</button>
+                <button class="btn btn-danger" onclick="executeReset(false)">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <h3 id="deleteTitle">Delete Scan?</h3>
+            <p id="deleteMsg">Delete this scan?</p>
+            <p id="deleteInfo" style="font-weight:bold; color:var(--ak-maroon);"></p>
+            <div class="modal-buttons">
+                <button class="btn btn-danger" onclick="executeDelete(true)">Yes</button>
+                <button class="btn btn-primary" onclick="executeDelete(false)">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal">
+            <h3>Admin Reset</h3>
+            <p>Enter admin code:</p>
+            <input type="password" id="adminCodeInput" style="width:100%; padding:10px; margin:10px 0; border:2px solid var(--ak-cream); border-radius:6px;">
+            <div class="modal-buttons">
+                <button class="btn btn-danger" onclick="executeAdminReset()">Reset</button>
+                <button class="btn btn-primary" onclick="closeAdminModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SheetJS -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    
+    <script>
+        // =============================================================
+        // CONFIGURATION
+        // =============================================================
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzOc6X_mxeknOoSppEelhR555OvJwKBShfUYxwmEzme-nuSlV3pSekTD_YbXUL2Smz9Rg/exec';
+        const ADMIN_CODE = 'AK@2026';
+        const USE_GOOGLE_SHEETS = true;
+        
+        const FALLBACK_STORES = [
+            { storeId: 'RIN20041', storeName: 'AK - Olaya Branch', location: 'Riyadh, Olaya Street' },
+            { storeId: 'RIN20042', storeName: 'AK - Malaz Branch', location: 'Riyadh, Malaz Area' },
+            { storeId: 'RIN20043', storeName: 'AK - Sulaimaniyah', location: 'Riyadh, Sulaimaniyah' },
+            { storeId: 'JED10001', storeName: 'AK - Tahlia Branch', location: 'Jeddah, Tahlia Street' },
+            { storeId: 'JED10002', storeName: 'AK - Corniche Branch', location: 'Jeddah, Corniche Road' },
+            { storeId: 'DMM30001', storeName: 'AK - Khobar Branch', location: 'Dammam, Al Khobar' }
+        ];
+
+        // ============= TRANSLATIONS =============
+        const T = {
+            en: {
+                headerTitle: "AK Box Scanner",
+                storeSetupTitle: "Store Setup",
+                storeSetupDesc: "Enter your Store ID to begin",
+                storeIdLabel: "Store ID",
+                lookupBtnText: "Lookup Store",
+                confirmQuestion: "Is this your store?",
+                yesConfirmBtn: "Yes",
+                noConfirmBtn: "No",
+                sessionSetupTitle: "Session Setup",
+                staffLabel: "Your Name",
+                purposeLabel: "Purpose",
+                remarkLabel: "Remark",
+                startSessionBtn: "Start Session",
+                dispStoreLabel: "Store:",
+                dispStaffLabel: "Staff:",
+                statTotalLabel: "Total",
+                statBoxQtyLabel: "Box Qty",
+                statBoxesLabel: "Boxes",
+                boxIdLabel: "Box ID",
+                barcodeLabel: "Barcode",
+                recentTitle: "Last 5 Scans",
+                thBarcode: "Barcode",
+                thTime: "Time",
+                thAction: "Del",
+                downloadBtn: "Download",
+                resetBtn: "Reset",
+                deleteBtn: "Del",
+                closeBoxTitle: "Close Box?",
+                closeBoxMsg: "Are you sure you want to close this box?",
+                resetTitle: "Reset Session?",
+                resetMsg: "Download data and start new session?",
+                deleteTitle: "Delete Scan?",
+                deleteMsg: "Delete this scan?",
+                boxIdPlaceholder: "Scan box ID...",
+                barcodePlaceholder: "Scan barcode...",
+                remarkPlaceholder: "e.g., Fall Winter 2023 stocks",
+                storeIdPlaceholder: "e.g., RIN20041",
+                staffPlaceholder: "Enter your name...",
+                selectPurpose: "-- Select purpose --",
+                errStoreNotFound: "Store not found.",
+                errEnterName: "Please enter your name",
+                errSelectPurpose: "Please select purpose",
+                errEnterRemark: "Please enter a remark",
+                errBoxFirst: "Scan Box ID first",
+                errSameBox: "Scan same Box ID to close",
+                errCloseBoxFirst: "Close the box first!",
+                online: "● Online",
+                offline: "● Offline"
+            },
+            ar: {
+                headerTitle: "ماسح صناديق AK",
+                storeSetupTitle: "إعداد المتجر",
+                storeSetupDesc: "أدخل رقم المتجر للبدء",
+                storeIdLabel: "رقم المتجر",
+                lookupBtnText: "البحث",
+                confirmQuestion: "هل هذا متجرك؟",
+                yesConfirmBtn: "نعم",
+                noConfirmBtn: "لا",
+                sessionSetupTitle: "إعداد الجلسة",
+                staffLabel: "اسمك",
+                purposeLabel: "الغرض",
+                remarkLabel: "ملاحظة",
+                startSessionBtn: "بدء الجلسة",
+                dispStoreLabel: "المتجر:",
+                dispStaffLabel: "الموظف:",
+                statTotalLabel: "الإجمالي",
+                statBoxQtyLabel: "الصندوق",
+                statBoxesLabel: "مكتمل",
+                boxIdLabel: "رقم الصندوق",
+                barcodeLabel: "الباركود",
+                recentTitle: "آخر 5 مسح",
+                thBarcode: "الباركود",
+                thTime: "الوقت",
+                thAction: "حذف",
+                downloadBtn: "تحميل",
+                resetBtn: "إعادة",
+                deleteBtn: "حذف",
+                closeBoxTitle: "إغلاق الصندوق؟",
+                closeBoxMsg: "هل أنت متأكد من إغلاق هذا الصندوق؟",
+                resetTitle: "إعادة تعيين؟",
+                resetMsg: "تحميل البيانات وبدء جلسة جديدة؟",
+                deleteTitle: "حذف المسح؟",
+                deleteMsg: "حذف هذا المسح؟",
+                boxIdPlaceholder: "امسح رقم الصندوق...",
+                barcodePlaceholder: "امسح الباركود...",
+                remarkPlaceholder: "مثال: مخزون خريف وشتاء 2023",
+                storeIdPlaceholder: "مثال: RIN20041",
+                staffPlaceholder: "أدخل اسمك...",
+                selectPurpose: "-- اختر الغرض --",
+                errStoreNotFound: "المتجر غير موجود.",
+                errEnterName: "الرجاء إدخال اسمك",
+                errSelectPurpose: "الرجاء اختيار الغرض",
+                errEnterRemark: "الرجاء إدخال ملاحظة",
+                errBoxFirst: "امسح رقم الصندوق أولاً",
+                errSameBox: "امسح نفس رقم الصندوق للإغلاق",
+                errCloseBoxFirst: "أغلق الصندوق أولاً!",
+                online: "● متصل",
+                offline: "● غير متصل"
+            }
+        };
+
+        // ============= STATE =============
+        let state = {
+            storeId: localStorage.getItem('ak_store_id') || '',
+            storeName: localStorage.getItem('ak_store_name') || '',
+            storeLocation: localStorage.getItem('ak_store_location') || '',
+            staffName: '',
+            purpose: '',
+            remark: '',
+            currentBox: null,
+            boxScanning: false,
+            language: 'en',
+            scans: [],
+            pendingDeleteId: null,
+            completedBoxes: new Set(),
+            isOnline: navigator.onLine
+        };
+
+        // ============= ONLINE STATUS =============
+        function updateOnlineStatus() {
+            state.isOnline = navigator.onLine;
+            const el = document.getElementById('onlineStatus');
+            if (state.isOnline) {
+                el.textContent = t('online');
+                el.className = 'online-status online';
+            } else {
+                el.textContent = t('offline');
+                el.className = 'online-status offline';
+            }
+        }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+
+        // ============= PERSISTENCE =============
+        function saveSession() {
+            localStorage.setItem('ak_session', JSON.stringify({
+                staffName: state.staffName,
+                purpose: state.purpose,
+                remark: state.remark,
+                currentBox: state.currentBox,
+                boxScanning: state.boxScanning,
+                language: state.language,
+                completedBoxes: Array.from(state.completedBoxes)
+            }));
+        }
+
+        function loadSession() {
+            const s = localStorage.getItem('ak_session');
+            if (s) {
+                try {
+                    const d = JSON.parse(s);
+                    state.staffName = d.staffName || '';
+                    state.purpose = d.purpose || '';
+                    state.remark = d.remark || '';
+                    state.currentBox = d.currentBox || null;
+                    state.boxScanning = d.boxScanning || false;
+                    state.language = d.language || 'en';
+                    state.completedBoxes = new Set(d.completedBoxes || []);
+                    return true;
+                } catch(e) { return false; }
+            }
+            return false;
+        }
+
+        function clearSession() { localStorage.removeItem('ak_session'); }
+
+        function saveStore() {
+            localStorage.setItem('ak_store_id', state.storeId);
+            localStorage.setItem('ak_store_name', state.storeName);
+            localStorage.setItem('ak_store_location', state.storeLocation);
+        }
+
+        function clearStore() {
+            localStorage.removeItem('ak_store_id');
+            localStorage.removeItem('ak_store_name');
+            localStorage.removeItem('ak_store_location');
+            state.storeId = '';
+            state.storeName = '';
+            state.storeLocation = '';
+        }
+
+        // ============= DATABASE =============
+        let db;
+        const DB_NAME = 'AKBoxScannerDB';
+        const STORE = 'scans';
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, 1);
+                req.onerror = () => reject(req.error);
+                req.onsuccess = () => { db = req.result; resolve(db); };
+                req.onupgradeneeded = (e) => {
+                    const d = e.target.result;
+                    if (!d.objectStoreNames.contains(STORE)) {
+                        d.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+                    }
+                };
+            });
+        }
+
+        async function addScan(scan) {
+            return new Promise((res, rej) => {
+                const tx = db.transaction([STORE], 'readwrite');
+                const st = tx.objectStore(STORE);
+                const req = st.add(scan);
+                req.onsuccess = () => res(req.result);
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        async function getAllScans() {
+            return new Promise((res, rej) => {
+                const tx = db.transaction([STORE], 'readonly');
+                const st = tx.objectStore(STORE);
+                const req = st.getAll();
+                req.onsuccess = () => res(req.result);
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        async function updateScan(scan) {
+            return new Promise((res, rej) => {
+                const tx = db.transaction([STORE], 'readwrite');
+                const st = tx.objectStore(STORE);
+                const req = st.put(scan);
+                req.onsuccess = () => res(req.result);
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        async function deleteScanById(id) {
+            return new Promise((res, rej) => {
+                const tx = db.transaction([STORE], 'readwrite');
+                const st = tx.objectStore(STORE);
+                const req = st.delete(id);
+                req.onsuccess = () => res();
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        async function clearAllScans() {
+            return new Promise((res, rej) => {
+                const tx = db.transaction([STORE], 'readwrite');
+                const st = tx.objectStore(STORE);
+                const req = st.clear();
+                req.onsuccess = () => res();
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        // ============= GOOGLE SHEETS API =============
+        async function fetchFromGoogleSheets(action, params = {}) {
+            if (!USE_GOOGLE_SHEETS || !state.isOnline) return null;
+            
+            try {
+                const url = new URL(GOOGLE_SCRIPT_URL);
+                url.searchParams.append('action', action);
+                Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
+                
+                const response = await fetch(url.toString());
+                return await response.json();
+            } catch (e) {
+                console.error('Google Sheets fetch error:', e);
+                return null;
+            }
+        }
+
+        async function postToGoogleSheets(action, data) {
+            if (!USE_GOOGLE_SHEETS || !state.isOnline) return null;
+            
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, ...data })
+                });
+                return { success: true };
+            } catch (e) {
+                console.error('Google Sheets post error:', e);
+                return null;
+            }
+        }
+
+        async function getStoreData(storeId) {
+            const gsResult = await fetchFromGoogleSheets('getStore', { storeId });
+            if (gsResult && gsResult.success && gsResult.store) {
+                return gsResult.store;
+            }
+            return FALLBACK_STORES.find(s => s.storeId.toUpperCase() === storeId.toUpperCase()) || null;
+        }
+
+        // ============= LANGUAGE =============
+        function t(key) { return T[state.language][key] || key; }
+
+        function setLanguage(lang) {
+            state.language = lang;
+            document.body.classList.toggle('rtl', lang === 'ar');
+            document.getElementById('enBtn').classList.toggle('active', lang === 'en');
+            document.getElementById('arBtn').classList.toggle('active', lang === 'ar');
+            applyTranslations();
+            saveSession();
+        }
+
+        function applyTranslations() {
+            const lang = T[state.language];
+            Object.keys(lang).forEach(k => {
+                const el = document.getElementById(k);
+                if (el && el.tagName !== 'INPUT' && el.tagName !== 'SELECT') {
+                    el.textContent = lang[k];
+                }
+            });
+            document.getElementById('boxIdInput').placeholder = t('boxIdPlaceholder');
+            document.getElementById('barcodeInput').placeholder = t('barcodePlaceholder');
+            document.getElementById('remarkInput').placeholder = t('remarkPlaceholder');
+            document.getElementById('storeIdInput').placeholder = t('storeIdPlaceholder');
+            document.getElementById('staffInput').placeholder = t('staffPlaceholder');
+            
+            const purpSel = document.getElementById('purposeSelect');
+            if (purpSel.options[0]) purpSel.options[0].textContent = t('selectPurpose');
+            
+            updateOnlineStatus();
+            updateScansTable();
+        }
+
+        // ============= SCREENS =============
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // ============= STORE SETUP =============
+        function handleStoreIdKeyPress(e) { if (e.key === 'Enter') lookupStore(); }
+
+        async function lookupStore() {
+            const id = document.getElementById('storeIdInput').value.trim().toUpperCase();
+            const errDiv = document.getElementById('storeError');
+            const btn = document.getElementById('lookupStoreBtn');
+            
+            if (!id) {
+                errDiv.textContent = t('errStoreNotFound');
+                errDiv.classList.add('show');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = '...';
+            errDiv.classList.remove('show');
+            
+            const store = await getStoreData(id);
+            
+            btn.disabled = false;
+            btn.textContent = t('lookupBtnText');
+            
+            if (store) {
+                state.storeId = store.storeId;
+                state.storeName = store.storeName;
+                state.storeLocation = store.location;
+                
+                document.getElementById('confirmStoreId').textContent = store.storeId;
+                document.getElementById('confirmStoreName').textContent = store.storeName;
+                document.getElementById('confirmLocation').textContent = store.location;
+                
+                document.getElementById('storeConfirmBox').style.display = 'block';
+                document.getElementById('lookupStoreBtn').style.display = 'none';
+            } else {
+                errDiv.textContent = t('errStoreNotFound');
+                errDiv.classList.add('show');
+            }
+        }
+
+        function confirmStore(confirmed) {
+            if (confirmed) {
+                saveStore();
+                document.getElementById('sessionStoreDisplay').textContent = `${state.storeId} - ${state.storeName}`;
+                showScreen('sessionScreen');
+            } else {
+                document.getElementById('storeIdInput').value = '';
+                document.getElementById('storeConfirmBox').style.display = 'none';
+                document.getElementById('lookupStoreBtn').style.display = 'block';
+                state.storeId = '';
+                state.storeName = '';
+                state.storeLocation = '';
+            }
+        }
+
+        // ============= SESSION =============
+        function startSession() {
+            const staff = document.getElementById('staffInput').value.trim();
+            const purpose = document.getElementById('purposeSelect').value;
+            const remark = document.getElementById('remarkInput').value.trim();
+            
+            if (!staff) { alert(t('errEnterName')); return; }
+            if (!purpose) { alert(t('errSelectPurpose')); return; }
+            if (!remark) { alert(t('errEnterRemark')); return; }
+            
+            state.staffName = staff;
+            state.purpose = purpose;
+            state.remark = remark;
+            saveSession();
+            
+            document.getElementById('dispStore').textContent = `${state.storeId} - ${state.storeName}`;
+            document.getElementById('dispStaff').textContent = state.staffName;
+            
+            showScreen('scanScreen');
+            document.getElementById('boxIdInput').focus();
+            loadAndDisplayScans();
+        }
+
+        // ============= SCANNING =============
+        function handleBoxKeyPress(e) {
+            if (e.key === 'Enter') {
+                const boxId = document.getElementById('boxIdInput').value.trim();
+                if (!boxId) return;
+                
+                if (!state.boxScanning) {
+                    state.currentBox = boxId;
+                    state.boxScanning = true;
+                    saveSession();
+                    
+                    // Hide Box ID, Show Barcode
+                    document.getElementById('boxIdGroup').classList.add('hidden');
+                    document.getElementById('barcodeGroup').style.display = 'block';
+                    document.getElementById('boxIdInput').value = '';
+                    
+                    // Show Close Box button
+                    document.getElementById('closeBoxBtn').classList.add('show');
+                    document.getElementById('closeBoxBtnId').textContent = boxId;
+                    
+                    document.getElementById('barcodeInput').focus();
+                    updateStats();
+                } else {
+                    if (boxId === state.currentBox) {
+                        document.getElementById('boxIdInput').value = '';
+                        showCloseBoxConfirm();
+                    } else {
+                        alert(t('errSameBox'));
+                        document.getElementById('boxIdInput').value = '';
+                    }
+                }
+            }
+        }
+        
+        function showCloseBoxConfirm() {
+            document.getElementById('closeBoxModal').classList.add('active');
+        }
+
+        async function handleBarcodeKeyPress(e) {
+            if (e.key === 'Enter') {
+                const barcode = document.getElementById('barcodeInput').value.trim();
+                if (!barcode) return;
+                
+                if (!state.boxScanning) {
+                    alert(t('errBoxFirst'));
+                    document.getElementById('barcodeInput').value = '';
+                    document.getElementById('boxIdInput').focus();
+                    return;
+                }
+                
+                const scan = {
+                    storeId: state.storeId,
+                    storeName: state.storeName,
+                    staffName: state.staffName,
+                    purpose: state.purpose,
+                    remark: state.remark,
+                    boxNumber: String(state.currentBox),
+                    barcode: String(barcode),
+                    qty: 1,
+                    boxStatus: 'Open',
+                    timestamp: new Date().toISOString(),
+                    synced: false
+                };
+                
+                await addScan(scan);
+                
+                document.getElementById('barcodeInput').value = '';
+                document.getElementById('barcodeInput').classList.add('input-highlight');
+                setTimeout(() => document.getElementById('barcodeInput').classList.remove('input-highlight'), 500);
+                
+                await loadAndDisplayScans();
+            }
+        }
+
+        async function closeBox(confirmed) {
+            document.getElementById('closeBoxModal').classList.remove('active');
+            
+            if (confirmed) {
+                // Mark all scans for this box as "Closed"
+                const closedBox = state.currentBox;
+                for (const scan of state.scans) {
+                    if (scan.boxNumber === closedBox && scan.boxStatus === 'Open') {
+                        scan.boxStatus = 'Closed';
+                        scan.synced = false;
+                        await updateScan(scan);
+                    }
+                }
+                
+                if (state.currentBox) state.completedBoxes.add(state.currentBox);
+                state.currentBox = null;
+                state.boxScanning = false;
+                saveSession();
+                
+                // Show Box ID, Hide Barcode
+                document.getElementById('boxIdGroup').classList.remove('hidden');
+                document.getElementById('barcodeGroup').style.display = 'none';
+                
+                // Hide Close Box button
+                document.getElementById('closeBoxBtn').classList.remove('show');
+                document.getElementById('closeBoxBtnId').textContent = '';
+                
+                document.getElementById('boxIdInput').focus();
+                await loadAndDisplayScans();
+                updateStats();
+                
+                // AUTO-SYNC when box is closed
+                if (state.isOnline && USE_GOOGLE_SHEETS) {
+                    await autoSync();
+                }
+            } else {
+                document.getElementById('barcodeInput').focus();
+            }
+        }
+        
+        // Silent auto-sync - Only syncs CLOSED boxes
+        async function autoSync() {
+            try {
+                const unsynced = state.scans.filter(s => !s.synced && s.boxStatus === 'Closed');
+                if (unsynced.length === 0) return;
+                
+                const result = await postToGoogleSheets('addScans', { scans: unsynced });
+                
+                if (result && result.success) {
+                    for (const scan of unsynced) {
+                        scan.synced = true;
+                        await updateScan(scan);
+                    }
+                    await loadAndDisplayScans();
+                    console.log('Auto-synced ' + unsynced.length + ' scans');
+                }
+            } catch (e) {
+                console.log('Auto-sync failed:', e);
+            }
+        }
+
+        // ============= DISPLAY =============
+        async function loadAndDisplayScans() {
+            state.scans = await getAllScans();
+            updateStats();
+            updateScansTable();
+            updateSyncBadge();
+        }
+
+        function updateStats() {
+            document.getElementById('statTotal').textContent = state.scans.length;
+            
+            let boxQty = 0;
+            if (state.currentBox) {
+                boxQty = state.scans.filter(s => s.boxNumber === state.currentBox).length;
+            }
+            document.getElementById('statBoxQty').textContent = boxQty;
+            document.getElementById('statBoxes').textContent = state.completedBoxes.size;
+        }
+
+        function updateSyncBadge() {
+            const pending = state.scans.filter(s => !s.synced && s.boxStatus === 'Closed').length;
+            const badge = document.getElementById('syncBadge');
+            
+            if (pending === 0) {
+                badge.textContent = '✓';
+                badge.className = 'sync-badge synced';
+            } else {
+                badge.textContent = pending;
+                badge.className = 'sync-badge pending';
+            }
+        }
+
+        function updateScansTable() {
+            const tbody = document.getElementById('scansTableBody');
+            tbody.innerHTML = '';
+            
+            // Only show items from current OPEN box (last 5)
+            const currentBoxScans = state.scans.filter(s => 
+                s.boxNumber === state.currentBox && s.boxStatus === 'Open'
+            );
+            const recent = currentBoxScans.slice(-5).reverse();
+            
+            recent.forEach(scan => {
+                const tr = document.createElement('tr');
+                const time = new Date(scan.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                tr.innerHTML = `
+                    <td>${scan.barcode}</td>
+                    <td>${time}</td>
+                    <td><button class="delete-btn" onclick="confirmDelete(${scan.id}, '${scan.barcode}')">${t('deleteBtn')}</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ============= DELETE =============
+        function confirmDelete(id, barcode) {
+            state.pendingDeleteId = id;
+            document.getElementById('deleteInfo').textContent = barcode;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        async function executeDelete(confirmed) {
+            document.getElementById('deleteModal').classList.remove('active');
+            if (confirmed && state.pendingDeleteId) {
+                await deleteScanById(state.pendingDeleteId);
+                await loadAndDisplayScans();
+            }
+            state.pendingDeleteId = null;
+        }
+
+        // ============= EXPORT =============
+        async function downloadExcel() {
+            if (state.boxScanning && state.currentBox) {
+                alert(t('errCloseBoxFirst'));
+                return;
+            }
+            
+            const scans = await getAllScans();
+            
+            const data = scans.length === 0 
+                ? [['Store ID', 'Store Name', 'Staff', 'Purpose', 'Remark', 'Box Number', 'Barcode', 'Qty', 'Box Status', 'Timestamp']]
+                : scans.map(s => ({
+                    'Store ID': s.storeId,
+                    'Store Name': s.storeName,
+                    'Staff': s.staffName,
+                    'Purpose': s.purpose,
+                    'Remark': s.remark,
+                    'Box Number': s.boxNumber,
+                    'Barcode': s.barcode,
+                    'Qty': s.qty,
+                    'Box Status': s.boxStatus || 'Open',
+                    'Timestamp': new Date(s.timestamp).toLocaleString()
+                }));
+            
+            const ws = scans.length === 0 
+                ? XLSX.utils.aoa_to_sheet(data)
+                : XLSX.utils.json_to_sheet(data);
+            
+            ws['!cols'] = [{wch:12},{wch:20},{wch:12},{wch:12},{wch:20},{wch:12},{wch:20},{wch:5},{wch:8},{wch:18}];
+            
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Scans');
+            
+            const now = new Date();
+            const filename = `${state.storeId}_${state.staffName}_${now.toISOString().slice(0,10)}.xlsx`;
+            XLSX.writeFile(wb, filename);
+        }
+
+        // ============= RESET =============
+        function confirmReset() {
+            if (state.boxScanning && state.currentBox) {
+                alert(t('errCloseBoxFirst'));
+                return;
+            }
+            document.getElementById('resetModal').classList.add('active');
+        }
+
+        async function executeReset(confirmed) {
+            document.getElementById('resetModal').classList.remove('active');
+            
+            if (confirmed) {
+                await downloadExcel();
+                await clearAllScans();
+                
+                state.staffName = '';
+                state.purpose = '';
+                state.remark = '';
+                state.currentBox = null;
+                state.boxScanning = false;
+                state.scans = [];
+                state.completedBoxes = new Set();
+                clearSession();
+                
+                document.getElementById('staffInput').value = '';
+                document.getElementById('purposeSelect').value = '';
+                document.getElementById('remarkInput').value = '';
+                document.getElementById('boxIdInput').value = '';
+                document.getElementById('barcodeInput').value = '';
+                document.getElementById('barcodeGroup').style.display = 'none';
+                document.getElementById('boxIdGroup').classList.remove('hidden');
+                document.getElementById('closeBoxBtn').classList.remove('show');
+                
+                document.getElementById('sessionStoreDisplay').textContent = `${state.storeId} - ${state.storeName}`;
+                showScreen('sessionScreen');
+            }
+        }
+
+        // ============= ADMIN =============
+        function openAdminModal() {
+            document.getElementById('adminModal').classList.add('active');
+            document.getElementById('adminCodeInput').value = '';
+        }
+
+        function closeAdminModal() { document.getElementById('adminModal').classList.remove('active'); }
+
+        async function executeAdminReset() {
+            const code = document.getElementById('adminCodeInput').value;
+            
+            if (code === ADMIN_CODE) {
+                clearStore();
+                clearSession();
+                await clearAllScans();
+                
+                state.staffName = '';
+                state.purpose = '';
+                state.remark = '';
+                state.currentBox = null;
+                state.boxScanning = false;
+                state.scans = [];
+                state.completedBoxes = new Set();
+                
+                closeAdminModal();
+                document.getElementById('storeIdInput').value = '';
+                document.getElementById('storeConfirmBox').style.display = 'none';
+                document.getElementById('lookupStoreBtn').style.display = 'block';
+                document.getElementById('storeError').classList.remove('show');
+                showScreen('storeSetupScreen');
+                
+                alert('Store reset successful!');
+            } else {
+                alert('Invalid admin code.');
+            }
+        }
+
+        // ============= INIT =============
+        async function initApp() {
+            updateOnlineStatus();
+            
+            if (!state.storeId) {
+                showScreen('storeSetupScreen');
+                return;
+            }
+            
+            document.getElementById('sessionStoreDisplay').textContent = `${state.storeId} - ${state.storeName}`;
+            
+            const hasSession = loadSession();
+            
+            if (hasSession && state.staffName && state.purpose && state.remark) {
+                setLanguage(state.language);
+                
+                document.getElementById('dispStore').textContent = `${state.storeId} - ${state.storeName}`;
+                document.getElementById('dispStaff').textContent = state.staffName;
+                
+                if (state.boxScanning && state.currentBox) {
+                    document.getElementById('boxIdGroup').classList.add('hidden');
+                    document.getElementById('barcodeGroup').style.display = 'block';
+                    document.getElementById('closeBoxBtn').classList.add('show');
+                    document.getElementById('closeBoxBtnId').textContent = state.currentBox;
+                }
+                
+                showScreen('scanScreen');
+                state.boxScanning ? document.getElementById('barcodeInput').focus() : document.getElementById('boxIdInput').focus();
+                loadAndDisplayScans();
+            } else {
+                showScreen('sessionScreen');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initDB();
+            await initApp();
+            applyTranslations();
+            
+            // Auto-sync every 10 seconds
+            setInterval(async () => {
+                if (state.isOnline && USE_GOOGLE_SHEETS && state.staffName) {
+                    await autoSync();
+                }
+            }, 10000);
+        });
+    </script>
+</body>
+</html>
