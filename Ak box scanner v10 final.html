@@ -994,7 +994,15 @@ isSyncing: false  // Prevent duplicate sync
                 const boxId = document.getElementById('boxIdInput').value.trim();
                 if (!boxId) return;
                 
-                if (!state.boxScanning) {
+if (!state.boxScanning) {
+                    // Check if box was already closed in this session
+                    if (state.completedBoxes.has(boxId)) {
+                        const boxQty = state.scans.filter(s => s.boxNumber === boxId).length;
+                        alert('Box ' + boxId + ' already closed (' + boxQty + ' items)');
+                        document.getElementById('boxIdInput').value = '';
+                        return;
+                    }
+                    
                     state.currentBox = boxId;
                     state.boxScanning = true;
                     saveSession();
